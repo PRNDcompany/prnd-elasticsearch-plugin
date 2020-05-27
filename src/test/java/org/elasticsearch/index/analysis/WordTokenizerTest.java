@@ -56,9 +56,9 @@ public class WordTokenizerTest extends BaseTokenStreamTestCase {
         );
     }
 
-    public void testDropLast() throws IOException {
+    public void testSplitTrailingConsonant() throws IOException {
         assertAnalyzesTo(testAnalyzer, "터보차전",
-                new String[]{"터보차저"}
+                new String[]{"터보차저", "ㄴ"}
         );
     }
 }

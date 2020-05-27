@@ -56,12 +56,14 @@ final public class WordTokenizer extends Tokenizer {
                 // 마지막 문자가 종성이 있는 한글인 경우, 없는 경우에 대해 단어를 계산하고 score가 낮다면 교체
                 str.setCharAt(end, HangulUtils.removeTrailingConsonant(lastChar));
                 System.out.printf("s2=%s\n", str.toString());
-                double score2 = splitWords(str.toString(), index, end, words2, startOffsets2);
+                double score2 = splitWords(str.toString(), index, end, words2, startOffsets2) + dict.get(Character.toString(lastChar));
                 str.setCharAt(end, lastChar);
-
                 System.out.printf("score=%f score2=%f\n", score, score2);
 
                 if (score > score2) {
+                    words2.add(Character.toString(HangulUtils.extractTrailingConsonant(lastChar)));
+                    startOffsets2.add(str.length());
+
                     List<String> tmpWords = words;
                     List<Integer> tmpStartOffsets = startOffsets;
 
