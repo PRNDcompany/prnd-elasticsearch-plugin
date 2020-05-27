@@ -20,14 +20,18 @@ final public class WordTokenizer extends Tokenizer {
 
     private final StringBuilder str = new StringBuilder();
 
-    private final List<String> words;
+    private List<String> words;
+    private List<String> words2;
     private int wordIndex;
-    private final List<Integer> startOffsets;
+    private List<Integer> startOffsets;
+    private List<Integer> startOffsets2;
 
     public WordTokenizer(Dictionary dict) {
         this.dict = dict;
         words = new ArrayList<>();
         startOffsets = new ArrayList<>();
+        words2 = new ArrayList<>();
+        startOffsets2 = new ArrayList<>();
         wordIndex = 0;
         matcher = Pattern.compile("\\s+").matcher("");
     }
@@ -41,13 +45,32 @@ final public class WordTokenizer extends Tokenizer {
                 return false;
             }
 
-            if (matcher.find()) {
-                splitWords(index, matcher.start()-1);
-                index = matcher.end();
-            } else {
-                splitWords(index, str.length()-1);
-                index = str.length();
+            wordIndex = 0;
+            boolean found = matcher.find();
+            int end = found ? matcher.start() - 1 : str.length() - 1;
+            System.out.printf("s1=%s\n", str.toString());
+            double score = splitWords(str.toString(), index, end, words, startOffsets);
+
+            char lastChar = str.charAt(end);
+            str.setCharAt(end, HangulUtils.removeTrailingConsonant(lastChar));
+            System.out.printf("s2=%s\n", str.toString());
+            double score2 = splitWords(str.toString(), index, end, words2, startOffsets2);
+            str.setCharAt(end, lastChar);
+
+            System.out.printf("score=%f score2=%f\n", score, score2);
+
+            if (score > score2) {
+                List<String> tmpWords = words;
+                List<Integer> tmpStartOffsets = startOffsets;
+
+                words = words2;
+                startOffsets = startOffsets2;
+
+                words2 = tmpWords;
+                startOffsets2 = tmpStartOffsets;
             }
+
+            index = found ? matcher.end() : str.length();
         }
 
         String word = words.get(wordIndex);
@@ -58,9 +81,8 @@ final public class WordTokenizer extends Tokenizer {
         return true;
     }
 
-    private void splitWords(int start, int end) {
+    private double splitWords(String str, int start, int end, List<String> words, List<Integer> startOffsets) {
         words.clear();
-        wordIndex = 0;
         startOffsets.clear();
 
         int length = end - start + 1;
@@ -92,6 +114,7 @@ final public class WordTokenizer extends Tokenizer {
             words.add(0, word);
             startOffsets.add(0, start + indices[i]);
         }
+        return scores[scores.length - 1];
     }
 
     @Override
@@ -117,7 +140,7 @@ final public class WordTokenizer extends Tokenizer {
         fillBuffer(input);
         matcher.reset(str);
         index = 0;
-        // System.out.printf("---- RESET %s\n", str);
+         System.out.printf("---- RESET %s\n", str);
     }
 
     // TODO: we should see if we can make this tokenizer work without reading

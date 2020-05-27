@@ -59,6 +59,6 @@ public class HangulUtils {
     }
 
     public static char removeTrailingConsonant(char unicode) {
-        return (char) (unicode - extractLeadingConsonant(unicode) + EMPTY_TRAILING_CONSONANT);
+        return (char) (unicode - (unicode - UNICODE_START) % 28);
     }
 }
