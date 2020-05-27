@@ -22,6 +22,7 @@ public class WordTokenizerTest extends BaseTokenStreamTestCase {
                 Map<String, Double> map = new HashMap<>();
                 map.put("엔진", Math.log(1*Math.log(100)));
                 map.put("누유", Math.log(2*Math.log(100)));
+                map.put("터보차저", Math.log(3*Math.log(100)));
                 return new TokenStreamComponents(new WordTokenizer(new Dictionary(map)));
             }
         };
@@ -52,6 +53,12 @@ public class WordTokenizerTest extends BaseTokenStreamTestCase {
     public void testWhitespace() throws IOException {
         assertAnalyzesTo(testAnalyzer, "엔진누 유",
             new String[]{"엔진", "누", "유"}
+        );
+    }
+
+    public void testDropLast() throws IOException {
+        assertAnalyzesTo(testAnalyzer, "터보차전",
+                new String[]{"터보차저"}
         );
     }
 }
